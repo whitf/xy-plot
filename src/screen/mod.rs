@@ -74,8 +74,9 @@ impl Screen<'_> {
 			self.canvas.fill_rect(Rect::new(0, 0, 1200, 900))
 				.expect("failed to draw plotting rectangle");
 
+			// draw graph labels
 
-
+			// draw data
 
 			self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
 			self.canvas.present();

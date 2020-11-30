@@ -1,4 +1,7 @@
 use clap::{App, Arg};
+use std::fs;
+use std::str::FromStr;
+use toml::Value;
 
 pub mod data;
 pub mod screen;
@@ -50,6 +53,16 @@ fn main() {
 			.long("file")
 			.takes_value(true)
 			.help("Specify a file to use for input data."))
+		.arg(Arg::with_name("label-x")
+			.short("x")
+			.long("label-x")
+			.takes_value(true)
+			.help("Specify a label for the x-axis."))
+		.arg(Arg::with_name("label-y")
+			.short("y")
+			.long("label-y")
+			.takes_value(true)
+			.help("Specify a label for the y-axis."))
 		.get_matches();
 
 	let width = 1200u32;
@@ -59,7 +72,33 @@ fn main() {
 	let mut screen = screen::Screen::new(width, height, &mut sdl_context);
 	let mut window = Window::new(&mut screen);
 
-	//let mut data = data::Data::new("x".to_string(), "y".to_string());
-	let data = data::Data::new("x".to_string(), "y".to_string());
+	let data_file = matches.value_of("file").unwrap_or("data/data.toml");
+	let mut data = data::Data::new("x".to_string(), "y".to_string());
+
+	let toml_content = fs::read_to_string(&data_file).expect("Could not read toml data file.");
+	let raw_data: Value = toml::from_str(&toml_content).expect("Could not parse data.");
+	let mapped_data: &toml::map::Map<String, Value> = raw_data["xy"].as_table().unwrap();
+
+	for (k, v) in mapped_data.iter() {
+		match k.as_str() {
+			"data" => {
+				for d in v.as_array().unwrap() {
+					let x: i64 = d["x"].as_integer().unwrap();
+					let y: i64 = d["y"].as_integer().unwrap();
+
+					let p = data::Point::new(x, y, "DataLabel".to_string());
+					data.data.push(p);
+				}
+
+			},
+			_ => {
+				println!("Unrecognized key value in data file.");
+			}
+		}
+	}
+
+	println!("launching plotting window with {} points", data.data.len());
+
+
 	window.launch(data);
 }
