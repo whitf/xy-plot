@@ -109,6 +109,9 @@ impl Screen<'_> {
 
 	fn process_event(event: Event) -> bool {
 		match event {
+			Event::Quit { .. } => {
+				return false;
+			},
 			Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
 				return false;
 			},

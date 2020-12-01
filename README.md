@@ -4,3 +4,6 @@ To access the built in help:
 >cargo run -- --help
 
 Sample input files can be found in the data directory.
+
+Press 'Esc' to close the window.
+
