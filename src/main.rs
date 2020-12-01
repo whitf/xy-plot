@@ -8,18 +8,15 @@ pub mod screen;
 pub struct SdlContext {
 	pub _image_context:				sdl2::image::Sdl2ImageContext,
 	pub sdl_context:				sdl2::Sdl,
-	pub _ttf_context:				sdl2::ttf::Sdl2TtfContext,
+	pub ttf_context:				sdl2::ttf::Sdl2TtfContext,
 }
 
 impl SdlContext {
 	fn init() -> SdlContext {
 		SdlContext {
-			_image_context: sdl2::image::init(sdl2::image::InitFlag::PNG)
-				.expect("Init failed: image_context"),
-			sdl_context: sdl2::init()
-				.expect("Init failed: sdl_context"),
-			_ttf_context: sdl2::ttf::init()
-				.expect("Init failed: ttf_context"),
+			_image_context: sdl2::image::init(sdl2::image::InitFlag::PNG).expect("Init failed: image_context"),
+			sdl_context: sdl2::init().expect("Init failed: sdl_context"),
+			ttf_context: sdl2::ttf::init().expect("Init failed: ttf_context"),
 		}
 	}
 }
