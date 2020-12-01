@@ -42,8 +42,7 @@ impl Screen<'_> {
 		}
 	}
 
-	fn label(&mut self, data: &data::Data) -> Result<(), String> {
-
+	fn label(&mut self, _data: &data::Data) -> Result<(), String> {
 		let width = self.canvas.viewport().w;
 		let height = self.canvas.viewport().h;
 
@@ -62,7 +61,12 @@ impl Screen<'_> {
 		self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
 
 		self.canvas.draw_line(origin, x_end)?;
+		self.canvas.draw_line(Point::new(x_end.x - 10, height - 50 - 10), x_end)?;
+		self.canvas.draw_line(Point::new(x_end.x - 10, height - 50 + 10), x_end)?;
+
 		self.canvas.draw_line(origin, y_end)?;
+		self.canvas.draw_line(Point::new(y_end.x - 10, y_end.y + 10), y_end)?;
+		self.canvas.draw_line(Point::new(y_end.x + 10, y_end.y + 10), y_end)?;
 
 		self.canvas.set_draw_color(old_draw_color);
 		Ok(())
@@ -77,6 +81,30 @@ impl Screen<'_> {
 		}
 
 		true
+	}
+
+	fn plot(&mut self, data: &data::Data) -> Result<(), String> {
+		let width = self.canvas.viewport().w;
+		let height = self.canvas.viewport().h;
+
+		let x_scale: i32 = width / data.x_max;
+		let y_scale: i32 = height / data.y_max;
+
+		let origin = Point::new(
+			50,
+			height - 50);
+
+		let old_draw_color = self.canvas.draw_color();
+
+		self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
+
+		for p in &data.data {
+			let center = Screen::translate(Point::new(p.x, p.y), origin, x_scale, y_scale);
+			self.canvas.fill_rect(Rect::new(center.x - 5, center.y - 5, 10, 10))?;
+		}
+
+		self.canvas.set_draw_color(old_draw_color);
+		Ok(())
 	}
 
 	pub fn run(&mut self, data: data::Data) {
@@ -98,32 +126,18 @@ impl Screen<'_> {
 
 			self.label(&data).unwrap();
 
-			// draw data
-
-			/*
-			let x_scale: i32 = 1100 / data.x_max;
-			let y_scale: i32 = 800 / data.y_max;
-
-			for p in &data.data {
-				let point   = Screen::translate(p.x * x_scale, p.y * y_scale, 50i32, 50i32);
-					self.canvas.draw_point(point).unwrap();
-			}
-			*/
-
+			self.plot(&data).unwrap();
+			
 			self.canvas.present();
 
 			thread::sleep(self.tic);
 		}
 	}
 
-	fn translate( x: i32, y: i32, x_min: i32, y_min: i32) -> Point {
-		//println!("translate (x, y) + (x_min, y_min) = ({}, {})   + ({}, {})", x, y, x_min, y_min);
+	fn translate(p: Point, origin: Point, x_scale: i32, y_scale: i32) -> Point {
+		let x = origin.x + (p.x * x_scale);
+		let y = origin.y - (p.y * y_scale); 
 
-
-
-		Point::new(
-			1200 - x,
-			y_min + y
-		)
+		Point::new(x, y)
 	}
 }
