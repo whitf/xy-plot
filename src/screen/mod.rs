@@ -42,7 +42,33 @@ impl Screen<'_> {
 		}
 	}
 
-	pub fn process_event(event: Event) -> bool {
+	fn label(&mut self, data: &data::Data) -> Result<(), String> {
+
+		let width = self.canvas.viewport().w;
+		let height = self.canvas.viewport().h;
+
+		let origin = Point::new(
+			50,
+			height - 50);
+		let x_end = Point::new(
+			width - 50,
+			height - 50);
+		let y_end  = Point::new(
+			50,
+			50);
+
+		let old_draw_color = self.canvas.draw_color();
+
+		self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
+
+		self.canvas.draw_line(origin, x_end)?;
+		self.canvas.draw_line(origin, y_end)?;
+
+		self.canvas.set_draw_color(old_draw_color);
+		Ok(())
+	}
+
+	fn process_event(event: Event) -> bool {
 		match event {
 			Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
 				return false;
@@ -70,28 +96,34 @@ impl Screen<'_> {
 			self.canvas.fill_rect(Rect::new(0, 0, 1200, 900))
 				.expect("failed to draw plotting rectangle");
 
-			// draw graph labels
-			self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
-			self.canvas.draw_line(
-				Point::new(50i32, 850i32),
-				Point::new(50i32, 50i32)
-			).unwrap();
-			self.canvas.draw_line(
-				Point::new(50i32, 850i32),
-				Point::new(1150i32, 850i32)
-			).unwrap();
-
-			let scale = 10i32;
+			self.label(&data).unwrap();
 
 			// draw data
-			for p in &data.data {
-				self.canvas.draw_point(Point::new(p.x * scale, p.y * scale)).unwrap();
-			}
 
+			/*
+			let x_scale: i32 = 1100 / data.x_max;
+			let y_scale: i32 = 800 / data.y_max;
+
+			for p in &data.data {
+				let point   = Screen::translate(p.x * x_scale, p.y * y_scale, 50i32, 50i32);
+					self.canvas.draw_point(point).unwrap();
+			}
+			*/
 
 			self.canvas.present();
 
 			thread::sleep(self.tic);
 		}
+	}
+
+	fn translate( x: i32, y: i32, x_min: i32, y_min: i32) -> Point {
+		//println!("translate (x, y) + (x_min, y_min) = ({}, {})   + ({}, {})", x, y, x_min, y_min);
+
+
+
+		Point::new(
+			1200 - x,
+			y_min + y
+		)
 	}
 }
