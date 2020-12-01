@@ -96,7 +96,7 @@ fn main() {
 		}
 	}
 
-	println!("launching plotting window with {} points", data.data.len());
+	println!(" Launching plotting window with {} points", data.data.len());
 
 
 	window.launch(data);

@@ -19,13 +19,13 @@ pub struct Screen<'a> {
 impl Screen<'_> {
 	pub fn new<'a>(width: u32, height: u32, sdl_context: &'a mut SdlContext) -> Screen<'a> {
 		const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-
+		let title = format!("xy-plot v.{}", VERSION);
 		let fps = 60u64;
 		let tic = Duration::from_millis(1000u64 / fps);
 
 		let video_subsystem = sdl_context.sdl_context.video()
 			.expect("Failed to init video_subsystem from sdl_context");
-		let window = video_subsystem.window(VERSION, width, height)
+		let window = video_subsystem.window(&title, width, height)
 			.position_centered()
 			.build()
 			.unwrap();
@@ -46,29 +46,37 @@ impl Screen<'_> {
 		let width = self.canvas.viewport().w;
 		let height = self.canvas.viewport().h;
 
-		let origin = Point::new(
-			50,
-			height - 50);
-		let x_end = Point::new(
-			width - 50,
-			height - 50);
-		let y_end  = Point::new(
-			50,
-			50);
+		let origin = Point::new(50, height - 50);
+		let x_end = Point::new(width - 50, height - 50);
+		let y_end  = Point::new(50, 50);
 
 		let old_draw_color = self.canvas.draw_color();
-
 		self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
 
 		self.canvas.draw_line(origin, x_end)?;
 		self.canvas.draw_line(Point::new(x_end.x - 10, height - 50 - 10), x_end)?;
 		self.canvas.draw_line(Point::new(x_end.x - 10, height - 50 + 10), x_end)?;
 
+		let interval: i32 = (x_end.x - origin.x) / 4;
+		for i in 1..4 {
+			let a = Point::new(i * interval, origin.y - 5);
+			let b = Point::new(i * interval, origin.y + 5);
+			self.canvas.draw_line(a, b)?;
+		}
+
 		self.canvas.draw_line(origin, y_end)?;
 		self.canvas.draw_line(Point::new(y_end.x - 10, y_end.y + 10), y_end)?;
 		self.canvas.draw_line(Point::new(y_end.x + 10, y_end.y + 10), y_end)?;
 
+		let interval: i32 = (origin.y - y_end.y) / 4;
+		for i in 1..4 {
+			let a = Point::new(origin.x - 5, origin.y - (i * interval));
+			let b = Point::new(origin.x + 5, origin.y - (i * interval));
+			self.canvas.draw_line(a, b)?;
+		}
+
 		self.canvas.set_draw_color(old_draw_color);
+
 		Ok(())
 	}
 
@@ -90,9 +98,7 @@ impl Screen<'_> {
 		let x_scale: i32 = width / data.x_max;
 		let y_scale: i32 = height / data.y_max;
 
-		let origin = Point::new(
-			50,
-			height - 50);
+		let origin = Point::new(50, height - 50);
 
 		let old_draw_color = self.canvas.draw_color();
 
@@ -104,6 +110,7 @@ impl Screen<'_> {
 		}
 
 		self.canvas.set_draw_color(old_draw_color);
+		
 		Ok(())
 	}
 
