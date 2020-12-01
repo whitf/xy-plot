@@ -1,6 +1,5 @@
 use clap::{App, Arg};
 use std::fs;
-use std::str::FromStr;
 use toml::Value;
 
 pub mod data;
@@ -83,8 +82,8 @@ fn main() {
 		match k.as_str() {
 			"data" => {
 				for d in v.as_array().unwrap() {
-					let x: i64 = d["x"].as_integer().unwrap();
-					let y: i64 = d["y"].as_integer().unwrap();
+					let x = d["x"].as_integer().unwrap() as i32;
+					let y = d["y"].as_integer().unwrap() as i32;
 
 					let p = data::Point::new(x, y, "DataLabel".to_string());
 					data.data.push(p);

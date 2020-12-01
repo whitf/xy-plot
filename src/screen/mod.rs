@@ -2,7 +2,7 @@ use sdl2;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use std::thread;
 use std::time::Duration;
@@ -22,7 +22,6 @@ impl Screen<'_> {
 
 		let fps = 60u64;
 		let tic = Duration::from_millis(1000u64 / fps);
-		let bg_fill = Color::RGBA(0, 0, 0, 255);
 
 		let video_subsystem = sdl_context.sdl_context.video()
 			.expect("Failed to init video_subsystem from sdl_context");
@@ -30,13 +29,11 @@ impl Screen<'_> {
 			.position_centered()
 			.build()
 			.unwrap();
-		let mut canvas = window.into_canvas()
+		let canvas = window.into_canvas()
 			.accelerated()
 			.present_vsync()
 			.build()
 			.expect("Failed to create canvas from window");
-
-		canvas.set_draw_color(bg_fill);
 
 		Screen {
 			canvas,
@@ -68,17 +65,30 @@ impl Screen<'_> {
 			}
 
 			self.canvas.clear();
-
 			self.canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
 
 			self.canvas.fill_rect(Rect::new(0, 0, 1200, 900))
 				.expect("failed to draw plotting rectangle");
 
 			// draw graph labels
+			self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
+			self.canvas.draw_line(
+				Point::new(50i32, 850i32),
+				Point::new(50i32, 50i32)
+			).unwrap();
+			self.canvas.draw_line(
+				Point::new(50i32, 850i32),
+				Point::new(1150i32, 850i32)
+			).unwrap();
+
+			let scale = 10i32;
 
 			// draw data
+			for p in &data.data {
+				self.canvas.draw_point(Point::new(p.x * scale, p.y * scale)).unwrap();
+			}
 
-			self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
+
 			self.canvas.present();
 
 			thread::sleep(self.tic);
